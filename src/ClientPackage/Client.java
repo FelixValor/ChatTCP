@@ -1,4 +1,4 @@
-package chattcp2;
+package ClientPackage;
 
 import java.awt.EventQueue;
 
