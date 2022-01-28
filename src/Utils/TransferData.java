@@ -5,22 +5,22 @@ import java.util.ArrayList;
 
 public class TransferData implements Serializable {
 
-    private ArrayList<String> currentsClients;
-    private String message, targetIp;
-    private Integer  targetPort;
+    private ArrayList<Integer> currentsClients;
+    private String message;
+    private Integer  clientID, target;
 
-    public TransferData(ArrayList<String> currentsClients, String message, String targetIp, Integer targetPort) {
+    public TransferData(ArrayList<Integer> currentsClients, String message, Integer clientID, Integer target) {
         this.currentsClients = currentsClients;
         this.message = message;
-        this.targetIp = targetIp;
-        this.targetPort = targetPort;
+        this.clientID = clientID;
+        this.target = target;
     }
 
-    public ArrayList<String> getCurrentsClients() {
+    public ArrayList<Integer> getCurrentsClients() {
         return currentsClients;
     }
 
-    public void setCurrentsClients(ArrayList<String> currentsClients) {
+    public void setCurrentsClients(ArrayList<Integer> currentsClients) {
         this.currentsClients = currentsClients;
     }
 
@@ -32,19 +32,19 @@ public class TransferData implements Serializable {
         this.message = message;
     }
 
-    public String getTargetIp() {
-        return targetIp;
+    public Integer getClientID() {
+        return clientID;
     }
 
-    public void setTargetIp(String targetIp) {
-        this.targetIp = targetIp;
+    public void setClientID(Integer clientID) {
+        this.clientID = clientID;
     }
 
-    public Integer getTargetPort() {
-        return targetPort;
+    public Integer getTarget() {
+        return target;
     }
 
-    public void setTargetPort(Integer targetPort) {
-        this.targetPort = targetPort;
+    public void setTarget(Integer target) {
+        this.target = target;
     }
 }

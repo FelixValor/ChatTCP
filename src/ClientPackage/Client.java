@@ -37,6 +37,7 @@ public class Client {
 	private static ObjectOutputStream ous;
 	private static TransferData infoFromServer;
 	private static String target = null;
+	private static Integer ownID;
 
 	/**
 	 * Launch the application.
@@ -73,7 +74,7 @@ public class Client {
 				else{
 					try{
 						ous.reset();
-						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), target.substring(0, target.indexOf(":")), Integer.valueOf(target.substring(target.indexOf(":")+1,target.length() ))));
+						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), ownID, Integer.valueOf(target)));
 						txtChat.setText(txtChat.getText()+"\n"+txtMessage.getText());
 						txtMessage.setText("");
 					}catch (Exception e2){
@@ -146,10 +147,10 @@ public class Client {
 			cmbClients.setBounds(441, 78, 133, 22);
 			frame.getContentPane().add(cmbClients);
 
-			for (String currentsClients : infoFromServer.getCurrentsClients()) {
-				if(!currentsClients.equals(ownSocket.getInetAddress().getHostAddress()+":"+ownSocket.getLocalPort())) {
-					System.out.println(currentsClients);
-					cmbClients.addItem(currentsClients);
+			ownID = infoFromServer.getClientID();
+			for (Integer currentsClients : infoFromServer.getCurrentsClients()) {
+				if(currentsClients != ownID) {
+					cmbClients.addItem(String.valueOf(currentsClients));
 				}
 			}
 		}catch(Exception e){

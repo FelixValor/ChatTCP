@@ -34,34 +34,18 @@ public class ServerThread extends Thread {
 
         try{
 
-            ArrayList<String> clients = new ArrayList<String>();
-            ArrayList<Socket> listClients = serverInfo.getClientsSockets();
-            for (Socket listClient : listClients) {
-                if (listClient == null) break;
-                clients.add(listClient.getInetAddress().getHostAddress() + ":" + listClient.getPort());
-            }
+            ArrayList<Integer> clientsID = new ArrayList<Integer>();
+            for (int i = 0; i < serverInfo.getCONECTIONSAMOUNT(); i++) clientsID.add(i);
 
-            clientInfo = new TransferData(clients, null, null,null);
+            clientInfo = new TransferData(clientsID, null, serverInfo.getCONECTIONSAMOUNT()-1,null);
             ous.reset();
             ous.writeObject(clientInfo);
 
             while (true){
                 TransferData infoFromClient = (TransferData) ois.readObject();
-/*                System.out.println(serverInfo.getClientsSockets()[0].getInetAddress().getHostAddress());
-                System.out.println(serverInfo.getClientsSockets()[0].getPort());
-                System.out.println("OBJETIVO");
-                System.out.println(infoFromClient.getTargetIp());
-                System.out.println(infoFromClient.getTargetPort());
-                System.out.println(serverInfo.getClientsSockets().length);*/
 
                 try{
-                    for (Socket clientTarget : serverInfo.getClientsSockets()) {
-                        if (infoFromClient.getTargetIp().equals(clientTarget.getInetAddress().getHostAddress()) && infoFromClient.getTargetPort()==clientTarget.getPort()){
-                            ObjectOutputStream ousToTarget = new ObjectOutputStream(clientTarget.getOutputStream());
-                            ousToTarget.reset();
-                            ousToTarget.writeObject(new TransferData(infoFromClient.getCurrentsClients(), infoFromClient.getMessage(), null, null));
-                        }
-                    }
+                    serverInfo.getClientsSockets().get(infoFromClient.getTarget());
                 }catch (Exception e){
                     e.printStackTrace();
                 }
