@@ -1,14 +1,15 @@
 package Utils;
 
+import java.io.Serializable;
 import java.net.Socket;
 
-public class ServerInfo {
+public class ServerInfo implements Serializable {
     private int MAXIMUM, CONECTIONSAMOUNT;
     public Socket[] clientsSockets;
 
     public ServerInfo(){}
 
-    public ServerInfo(int MAXIMUM, int CONECTIONSAMOUN, Socket[] clientsSockets) {
+    public ServerInfo(int MAXIMUM, int CONECTIONSAMOUNT, Socket[] clientsSockets) {
         this.MAXIMUM = MAXIMUM;
         this.CONECTIONSAMOUNT = CONECTIONSAMOUNT;
         this.clientsSockets = clientsSockets;

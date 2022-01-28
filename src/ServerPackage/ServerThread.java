@@ -33,11 +33,12 @@ public class ServerThread extends Thread {
         ClientInfo clientInfo;
 
         try{
+
             ArrayList<String> clients = new ArrayList<String>();
             Socket [] listClients = serverInfo.getClientsSockets();
-            for (int i = 0; i < listClients.length; i++) {
-                if (listClients[i]==null) break;
-                clients.add(listClients[i].getInetAddress().getHostAddress()+":"+listClients[i].getPort());
+            for (Socket listClient : listClients) {
+                if (listClient == null) break;
+                clients.add(listClient.getInetAddress().getHostAddress() + ":" + listClient.getPort());
             }
 
             clientInfo = new ClientInfo(clients, null, null,null);
@@ -46,18 +47,24 @@ public class ServerThread extends Thread {
 
             while (true){
                 ClientInfo infoFromClient = (ClientInfo) ois.readObject();
+                System.out.println(serverInfo.getClientsSockets()[0].getInetAddress().getHostAddress());
+                System.out.println(serverInfo.getClientsSockets()[0].getPort());
+                System.out.println("OBJETIVO");
+                System.out.println(infoFromClient.getTargetIp());
+                System.out.println(infoFromClient.getTargetPort());
+                System.out.println(serverInfo.getClientsSockets().length);
 
                 try{
-                    for (Socket clientTarget : serverInfo.getClientsSockets()) {
-                        if (infoFromClient.getTargetIp().equals(clientTarget.getInetAddress().getHostAddress())&& infoFromClient.getTargetPort()==clientTarget.getPort()){
-                            ObjectOutputStream ousToTarget = new ObjectOutputStream(clientTarget.getOutputStream());
+                    for (int i=0;serverInfo.getClientsSockets().length>i;i++) {
+                        if (infoFromClient.getTargetIp().equals(serverInfo.getClientsSockets()[i].getInetAddress().getHostAddress())&& infoFromClient.getTargetPort()==serverInfo.getClientsSockets()[i].getPort()){
+                            ObjectOutputStream ousToTarget = new ObjectOutputStream(serverInfo.getClientsSockets()[i].getOutputStream());
                             ousToTarget.reset();
-                            ousToTarget.writeObject(new ClientInfo(infoFromClient.getCurrentsClients(), infoFromClient.getMessage(), null, null));
+                            ousToTarget.writeObject(new ClientInfo(infoFromClient.getCurrentsClients(), infoFromClient.getMessage(), infoFromClient.getTargetIp(), infoFromClient.getTargetPort()));
+                            System.out.println(i);
                         }
                     }
-
                 }catch (Exception e){
-
+                    e.printStackTrace();
                 }
             }
         }catch (Exception e){

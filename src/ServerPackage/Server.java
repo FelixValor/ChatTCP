@@ -18,9 +18,8 @@ public class Server {
             ServerInfo serverInfo = new ServerInfo(MAXCLIENTS, 0, clientsSockets);
 
             while (serverInfo.getCONECTIONSAMOUNT()<MAXCLIENTS){
-                Socket clientSocket = new Socket();
-                clientSocket = serverSocket.accept();
-
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("entra:"+clientSocket.getPort());
 
                 serverInfo.addClientSocket(clientSocket, serverInfo.getCONECTIONSAMOUNT());
                 serverInfo.setCONECTIONSAMOUNT(serverInfo.getCONECTIONSAMOUNT()+1);

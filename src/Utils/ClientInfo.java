@@ -10,7 +10,7 @@ public class ClientInfo implements Serializable {
     private String message, targetIp;
     private Integer  targetPort;
 
-    public ClientInfo(ArrayList<String> currentsClients, String message, String target, Integer targetPort) {
+    public ClientInfo(ArrayList<String> currentsClients, String message, String targetIp, Integer targetPort) {
         this.currentsClients = currentsClients;
         this.message = message;
         this.targetIp = targetIp;
