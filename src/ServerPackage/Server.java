@@ -4,6 +4,7 @@ import Utils.ServerInfo;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Server {
     private static final int MAXCLIENTS = 5;
@@ -14,7 +15,7 @@ public class Server {
             ServerSocket serverSocket = new ServerSocket(PORT);
             System.out.println("[+] Servidor Iniciado\n#####################");
 
-            Socket[] clientsSockets = new Socket[MAXCLIENTS];
+            ArrayList<Socket> clientsSockets = new ArrayList<Socket>(0);
             ServerInfo serverInfo = new ServerInfo(MAXCLIENTS, 0, clientsSockets);
 
             while (serverInfo.getCONECTIONSAMOUNT()<MAXCLIENTS){

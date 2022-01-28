@@ -1,6 +1,6 @@
 package ClientPackage;
 
-import Utils.ClientInfo;
+import Utils.TransferData;
 
 import java.awt.EventQueue;
 
@@ -35,7 +35,7 @@ public class Client {
 	private static final String SERVERIP = "localhost";
 	private static ObjectInputStream ois;
 	private static ObjectOutputStream ous;
-	private static ClientInfo infoFromServer;
+	private static TransferData infoFromServer;
 	private static String target = null;
 
 	/**
@@ -73,7 +73,7 @@ public class Client {
 				else{
 					try{
 						ous.reset();
-						ous.writeObject(new ClientInfo(infoFromServer.getCurrentsClients(), txtMessage.getText(), target.substring(0, target.indexOf(":")), Integer.valueOf(target.substring(target.indexOf(":")+1,target.length() ))));
+						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), target.substring(0, target.indexOf(":")), Integer.valueOf(target.substring(target.indexOf(":")+1,target.length() ))));
 						txtChat.setText(txtChat.getText()+"\n"+txtMessage.getText());
 						txtMessage.setText("");
 					}catch (Exception e2){
@@ -137,7 +137,7 @@ public class Client {
 			ois = new ObjectInputStream(ownSocket.getInputStream());
 			ous = new ObjectOutputStream(ownSocket.getOutputStream());
 
-			infoFromServer = (ClientInfo) ois.readObject();
+			infoFromServer = (TransferData) ois.readObject();
 			cmbClients = new JComboBox();
 			cmbClients.addItem("");
 			txtChat.setEnabled(false);
