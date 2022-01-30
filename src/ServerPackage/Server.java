@@ -16,14 +16,13 @@ public class Server {
             System.out.println("[+] Servidor Iniciado\n#####################");
 
             ArrayList<Socket> clientsSockets = new ArrayList<Socket>(0);
-            ServerInfo serverInfo = new ServerInfo(MAXCLIENTS, 0, clientsSockets);
+            ServerInfo serverInfo = new ServerInfo(MAXCLIENTS, clientsSockets);
 
             while (serverInfo.getCONECTIONSAMOUNT()<MAXCLIENTS){
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("entra:"+clientSocket.getPort());
 
-                serverInfo.addClientSocket(clientSocket, serverInfo.getCONECTIONSAMOUNT());
-                serverInfo.setCONECTIONSAMOUNT(serverInfo.getCONECTIONSAMOUNT()+1);
+                serverInfo.addClientSocket(clientSocket);
 
                 System.out.println("Cliente Conectado: "+clientSocket.getInetAddress().getHostAddress()+":"+clientSocket.getPort());
                 System.out.println("Clientes actuales: "+serverInfo.getCONECTIONSAMOUNT());

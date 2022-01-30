@@ -6,15 +6,14 @@ import java.sql.Array;
 import java.util.ArrayList;
 
 public class ServerInfo implements Serializable {
-    private int MAXIMUM, CONECTIONSAMOUNT;
-    public ArrayList<Socket> clientsSockets;
+    private int MAXIMUM;
+    public static ArrayList<Socket> clientsSockets;
 
     public ServerInfo(){}
 
-    public ServerInfo(int MAXIMUM, int CONECTIONSAMOUNT, ArrayList<Socket> clientsSockets) {
+    public ServerInfo(int MAXIMUM, ArrayList<Socket> clientsSocket) {
         this.MAXIMUM = MAXIMUM;
-        this.CONECTIONSAMOUNT = CONECTIONSAMOUNT;
-        this.clientsSockets = clientsSockets;
+        ServerInfo.clientsSockets = clientsSocket;
     }
 
     public int getMAXIMUM() {
@@ -26,11 +25,7 @@ public class ServerInfo implements Serializable {
     }
 
     public int getCONECTIONSAMOUNT() {
-        return CONECTIONSAMOUNT;
-    }
-
-    public void setCONECTIONSAMOUNT(int CONECTIONSAMOUNT) {
-        this.CONECTIONSAMOUNT = CONECTIONSAMOUNT;
+        return clientsSockets.size();
     }
 
     public ArrayList<Socket> getClientsSockets() {
@@ -38,10 +33,10 @@ public class ServerInfo implements Serializable {
     }
 
     public void setClientsSockets(ArrayList<Socket> clientsSockets) {
-        this.clientsSockets = clientsSockets;
+        ServerInfo.clientsSockets = clientsSockets;
     }
 
-    public void addClientSocket(Socket clientSocket, int position) {
-        this.clientsSockets.add(clientSocket);
+    public void addClientSocket(Socket clientSocket) {
+        ServerInfo.clientsSockets.add(clientSocket);
     }
 }
