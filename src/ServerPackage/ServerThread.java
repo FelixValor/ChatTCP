@@ -45,7 +45,13 @@ public class ServerThread extends Thread {
                 TransferData infoFromClient = (TransferData) ois.readObject();
 
                 try{
-                    serverInfo.getClientsSockets().get(infoFromClient.getTarget());
+                    ObjectOutputStream ous = new ObjectOutputStream(serverInfo.getClientsSockets().get(infoFromClient.getTarget()).getOutputStream());
+                    ous.reset();
+                    clientsID.clear();
+                    for (int i = 0; i < serverInfo.getCONECTIONSAMOUNT(); i++) clientsID.add(i);
+                    ous.reset();
+                    TransferData infoToClient = new TransferData(clientsID, infoFromClient.getMessage(), null, infoFromClient.getClientID());
+                    ous.writeObject(infoToClient);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
