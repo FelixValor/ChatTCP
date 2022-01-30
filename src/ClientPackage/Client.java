@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 
 
 public class Client {
@@ -39,6 +40,7 @@ public class Client {
 	private static TransferData infoFromServer;
 	private static String target = null;
 	private static Integer ownID;
+	private static boolean gotID = false;
 
 	/**
 	 * Launch the application.
@@ -76,7 +78,7 @@ public class Client {
 					try{
 						ous.reset();
 						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), ownID, Integer.valueOf(target)));
-						txtChat.setText(txtChat.getText()+"\n"+txtMessage.getText());
+						txtChat.setText(txtChat.getText()+"\n"+ownID+">"+txtMessage.getText());
 						txtMessage.setText("");
 					}catch (Exception e2){
 						e2.printStackTrace();
@@ -135,6 +137,13 @@ public class Client {
 		frame.getContentPane().add(btnAbrirChat);
 
 		try{
+			cmbClients = new JComboBox();
+			cmbClients.addItem("");
+			txtChat.setEnabled(false);
+			txtMessage.setEnabled(false);
+			btnSend.setEnabled(false);
+			cmbClients.setBounds(441, 78, 133, 22);
+			frame.getContentPane().add(cmbClients);
 			ownSocket = new Socket(SERVERIP, SERVERPORT);
 			ous = new ObjectOutputStream(ownSocket.getOutputStream());
 			ClientThread clientThread = new ClientThread();
@@ -156,17 +165,16 @@ public class Client {
 				while (true){
 					ois = new ObjectInputStream(ownSocket.getInputStream());
 					infoFromServer = (TransferData) ois.readObject();
-					cmbClients = new JComboBox();
-					cmbClients.addItem("");
-					txtChat.setEnabled(false);
-					txtMessage.setEnabled(false);
-					btnSend.setEnabled(false);
-					cmbClients.setBounds(441, 78, 133, 22);
-					frame.getContentPane().add(cmbClients);
 
-					ownID = infoFromServer.getClientID();
+					cmbClients.removeAllItems();
+					cmbClients.addItem("");
+
+					if(!gotID){
+						ownID = infoFromServer.getClientID();
+						gotID = true;
+					}
 					for (Integer currentsClients : infoFromServer.getCurrentsClients()) {
-						if(currentsClients != ownID) {
+						if(!Objects.equals(currentsClients, ownID)) {
 							cmbClients.addItem(String.valueOf(currentsClients));
 						}
 					}
