@@ -22,7 +22,7 @@ import java.awt.event.ActionEvent;
 
 public class Client {
 
-	private JFrame frame;
+	private static JFrame frame;
 	private static JTextField txtMessage;
 	private static JButton btnSend = new JButton("Enviar");
 	private static JButton btnExit = new JButton("Salir");
@@ -33,6 +33,7 @@ public class Client {
 
 	private static final int SERVERPORT = 4444;
 	private static final String SERVERIP = "localhost";
+	private static Socket ownSocket;
 	private static ObjectInputStream ois;
 	private static ObjectOutputStream ous;
 	private static TransferData infoFromServer;
@@ -134,27 +135,48 @@ public class Client {
 		frame.getContentPane().add(btnAbrirChat);
 
 		try{
-			Socket ownSocket = new Socket(SERVERIP, SERVERPORT);
-			ois = new ObjectInputStream(ownSocket.getInputStream());
+			ownSocket = new Socket(SERVERIP, SERVERPORT);
 			ous = new ObjectOutputStream(ownSocket.getOutputStream());
+			ClientThread clientThread = new ClientThread();
+			clientThread.start();
 
-			infoFromServer = (TransferData) ois.readObject();
-			cmbClients = new JComboBox();
-			cmbClients.addItem("");
-			txtChat.setEnabled(false);
-			txtMessage.setEnabled(false);
-			btnSend.setEnabled(false);
-			cmbClients.setBounds(441, 78, 133, 22);
-			frame.getContentPane().add(cmbClients);
-
-			ownID = infoFromServer.getClientID();
-			for (Integer currentsClients : infoFromServer.getCurrentsClients()) {
-				if(currentsClients != ownID) {
-					cmbClients.addItem(String.valueOf(currentsClients));
-				}
-			}
 		}catch(Exception e){
 			System.err.println("Error al comunicarse con el Servidor: "+e.getMessage());
+		}
+	}
+
+	public static class ClientThread extends Thread{
+		public ClientThread(){
+
+		}
+
+		@Override
+		public void run() {
+			try{
+				while (true){
+					ois = new ObjectInputStream(ownSocket.getInputStream());
+					infoFromServer = (TransferData) ois.readObject();
+					cmbClients = new JComboBox();
+					cmbClients.addItem("");
+					txtChat.setEnabled(false);
+					txtMessage.setEnabled(false);
+					btnSend.setEnabled(false);
+					cmbClients.setBounds(441, 78, 133, 22);
+					frame.getContentPane().add(cmbClients);
+
+					ownID = infoFromServer.getClientID();
+					for (Integer currentsClients : infoFromServer.getCurrentsClients()) {
+						if(currentsClients != ownID) {
+							cmbClients.addItem(String.valueOf(currentsClients));
+						}
+					}
+					if (infoFromServer.getMessage()!=null) txtChat.setText(txtChat.getText()+"\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
+				}
+
+			}catch(Exception e){
+				System.err.println("Error al comunicarse con el Servidor: "+e.getMessage());
+				e.printStackTrace();
+			}
 		}
 	}
 }
