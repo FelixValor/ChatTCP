@@ -80,7 +80,7 @@ public class Client {
 				else{
 					try{
 						ous.reset();
-						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), ownID, Integer.valueOf(target)));
+						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), ownID, targetID));
 						clientThread.addMessages(targetID, "\n"+ownID+">"+txtMessage.getText());
 						txtChat.setText(txtChat.getText()+"\n"+ownID+">"+txtMessage.getText());
 					}catch (Exception e2){
@@ -127,18 +127,13 @@ public class Client {
 		btnAbrirChat = new JButton("Abrir Chat");
 		btnAbrirChat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String client= (String) cmbClients.getSelectedItem();
-				if (client.equals("")) JOptionPane.showMessageDialog(null, "Selecciona un cliente valido");
-				else{
-					target = client;
-					txtChat.setEnabled(true);
-					txtMessage.setEnabled(true);
-					btnSend.setEnabled(true);
-					txtChat.setEnabled(true);
-					txtChat.setText("");
-					targetID = Integer.parseInt((String) cmbClients.getSelectedItem());
-					clientThread.readMessage(client);
-				}
+				txtChat.setEnabled(true);
+				txtMessage.setEnabled(true);
+				btnSend.setEnabled(true);
+				txtChat.setEnabled(true);
+				txtChat.setText("");
+				targetID = Integer.parseInt((String) cmbClients.getSelectedItem());
+				clientThread.readMessage(String.valueOf(targetID));
 			}
 		});
 		btnAbrirChat.setBounds(441, 111, 133, 23);
@@ -187,8 +182,10 @@ public class Client {
 		}
 
 		public void readMessage(String clientID){
+			txtChat.setText("");
 			ArrayList<String> listMsg = getMessages(Integer.valueOf(clientID));
 			if (listMsg!=null) for (String msg : listMsg) txtChat.setText(txtChat.getText()+msg);
+
 		}
 
 		@Override
@@ -198,27 +195,41 @@ public class Client {
 					ois = new ObjectInputStream(ownSocket.getInputStream());
 					infoFromServer = (TransferData) ois.readObject();
 
-					cmbClients.removeAllItems();
-
 					if(!gotID){
 						ownID = infoFromServer.getClientID();
+						lblNickname.setText("Cliente: "+ownID);
 						gotID = true;
 					}
+
+					cmbClients.removeAllItems();
+
 					for (Integer currentsClients : infoFromServer.getCurrentsClients()) {
-						boolean notExist = false;
-						for (int i = 0; i < infoFromServer.getCurrentsClients().size(); i++) {
-							if (!currentsClients.equals(cmbClients.getItemAt(i))) notExist = true;
-							else notExist = false;
-						}
-						if (notExist) if(!Objects.equals(currentsClients, ownID)) cmbClients.addItem(String.valueOf(currentsClients));
+						if(!Objects.equals(currentsClients, ownID)) cmbClients.addItem(String.valueOf(currentsClients));
 					}
+
 					if (infoFromServer.getMessage()!=null){
 
 						addMessages(infoFromServer.getTarget(), "\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
+
 						if (targetID==infoFromServer.getTarget()){
 							txtChat.setText(txtChat.getText()+"\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
 						}
 					}
+
+
+					if(infoFromServer.getTarget()!=null){
+						for (int i = 0; i < infoFromServer.getCurrentsClients().size(); i++) {
+							if(infoFromServer.getTarget()==Integer.parseInt(cmbClients.getItemAt(i))){
+								cmbClients.setSelectedIndex(i);
+								readMessage(String.valueOf(infoFromServer.getTarget()));
+								targetID = Integer.valueOf((String)cmbClients.getSelectedItem());
+								System.out.println(targetID);
+								break;
+							}
+						}
+					}
+
+
 				}
 
 			}catch(Exception e){
