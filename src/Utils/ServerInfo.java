@@ -28,6 +28,8 @@ public class ServerInfo implements Serializable {
         return clientsSockets.size();
     }
 
+    public void deleteSocketByID(int id){clientsSockets.remove(id);}
+
     public ArrayList<Socket> getClientsSockets() {
         return clientsSockets;
     }

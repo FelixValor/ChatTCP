@@ -41,7 +41,7 @@ public class Client {
 	private static ObjectOutputStream ous;
 	private static TransferData infoFromServer;
 	private static String target = null;
-	private static Integer ownID;
+	private static Integer ownID, targetID;
 	private static boolean gotID = false;
 	private ClientThread clientThread;
 
@@ -81,17 +81,17 @@ public class Client {
 					try{
 						ous.reset();
 						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), ownID, Integer.valueOf(target)));
-						clientThread.addMessages(Integer.valueOf((String)cmbClients.getSelectedItem()), "\n"+ownID+">"+txtMessage.getText());
+						clientThread.addMessages(targetID, "\n"+ownID+">"+txtMessage.getText());
 						txtChat.setText(txtChat.getText()+"\n"+ownID+">"+txtMessage.getText());
-						txtMessage.setText("");
 					}catch (Exception e2){
 						e2.printStackTrace();
 					}
 				}
+				txtMessage.setText("");
 			}
 		});
-		
-		
+
+
 		btnSend.setFont(new Font("Tahoma", Font.BOLD, 17));
 		btnSend.setBounds(419, 409, 155, 41);
 		frame.getContentPane().add(btnSend);
@@ -100,30 +100,30 @@ public class Client {
 				System.exit(0);
 			}
 		});
-		
-		
+
+
 		btnExit.setBounds(441, 19, 133, 23);
 		frame.getContentPane().add(btnExit);
-		
+
 		txtMessage = new JTextField();
 		txtMessage.setFont(new Font("Tahoma", Font.PLAIN, 17));
 		txtMessage.setBounds(24, 409, 385, 41);
 		frame.getContentPane().add(txtMessage);
 		txtMessage.setColumns(10);
-		
-		
+
+
 		txtChat.setEditable(false);
 		txtChat.setBounds(24, 53, 385, 345);
 		frame.getContentPane().add(txtChat);
-		
+
 		JLabel lblCombo = new JLabel("Clientes disponibles");
 		lblCombo.setBounds(441, 53, 133, 14);
 		frame.getContentPane().add(lblCombo);
-		
-		
+
+
 		lblNickname.setBounds(24, 23, 219, 14);
 		frame.getContentPane().add(lblNickname);
-		
+
 		btnAbrirChat = new JButton("Abrir Chat");
 		btnAbrirChat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -136,8 +136,8 @@ public class Client {
 					btnSend.setEnabled(true);
 					txtChat.setEnabled(true);
 					txtChat.setText("");
-					ArrayList<String> listMsg = clientThread.getMessages(Integer.valueOf(client));
-					if (listMsg!=null) for (String msg : listMsg) txtChat.setText(txtChat.getText()+msg);
+					targetID = Integer.parseInt((String) cmbClients.getSelectedItem());
+					clientThread.readMessage(client);
 				}
 			}
 		});
@@ -186,6 +186,11 @@ public class Client {
 			return messages.get(target);
 		}
 
+		public void readMessage(String clientID){
+			ArrayList<String> listMsg = getMessages(Integer.valueOf(clientID));
+			if (listMsg!=null) for (String msg : listMsg) txtChat.setText(txtChat.getText()+msg);
+		}
+
 		@Override
 		public void run() {
 			try{
@@ -194,20 +199,25 @@ public class Client {
 					infoFromServer = (TransferData) ois.readObject();
 
 					cmbClients.removeAllItems();
-					cmbClients.addItem("");
 
 					if(!gotID){
 						ownID = infoFromServer.getClientID();
 						gotID = true;
 					}
 					for (Integer currentsClients : infoFromServer.getCurrentsClients()) {
-						if(!Objects.equals(currentsClients, ownID)) {
-							cmbClients.addItem(String.valueOf(currentsClients));
+						boolean notExist = false;
+						for (int i = 0; i < infoFromServer.getCurrentsClients().size(); i++) {
+							if (!currentsClients.equals(cmbClients.getItemAt(i))) notExist = true;
+							else notExist = false;
 						}
+						if (notExist) if(!Objects.equals(currentsClients, ownID)) cmbClients.addItem(String.valueOf(currentsClients));
 					}
 					if (infoFromServer.getMessage()!=null){
-						txtChat.setText(txtChat.getText()+"\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
+
 						addMessages(infoFromServer.getTarget(), "\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
+						if (targetID==infoFromServer.getTarget()){
+							txtChat.setText(txtChat.getText()+"\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
+						}
 					}
 				}
 

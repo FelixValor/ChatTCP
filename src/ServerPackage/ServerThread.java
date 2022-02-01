@@ -31,6 +31,7 @@ public class ServerThread extends Thread {
     @Override
     public void run() {
         TransferData clientInfo;
+        Integer id = serverInfo.getCONECTIONSAMOUNT()-1;
 
         try{
 
@@ -43,6 +44,7 @@ public class ServerThread extends Thread {
 
             while (true){
                 TransferData infoFromClient = (TransferData) ois.readObject();
+
 
                 try{
                     ObjectOutputStream ous = new ObjectOutputStream(ServerInfo.clientsSockets.get(infoFromClient.getTarget()).getOutputStream());
@@ -59,6 +61,7 @@ public class ServerThread extends Thread {
         }catch (Exception e){
             System.err.println("Error al comunicarse con el cliente: "+e.getMessage());
             e.printStackTrace();
+            serverInfo.deleteSocketByID(id);
         }
     }
 }
