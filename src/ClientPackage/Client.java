@@ -18,6 +18,8 @@ import javax.swing.JOptionPane;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 
@@ -41,6 +43,7 @@ public class Client {
 	private static String target = null;
 	private static Integer ownID;
 	private static boolean gotID = false;
+	private ClientThread clientThread;
 
 	/**
 	 * Launch the application.
@@ -78,6 +81,7 @@ public class Client {
 					try{
 						ous.reset();
 						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), ownID, Integer.valueOf(target)));
+						clientThread.addMessages(Integer.valueOf((String)cmbClients.getSelectedItem()), "\n"+ownID+">"+txtMessage.getText());
 						txtChat.setText(txtChat.getText()+"\n"+ownID+">"+txtMessage.getText());
 						txtMessage.setText("");
 					}catch (Exception e2){
@@ -130,6 +134,10 @@ public class Client {
 					txtChat.setEnabled(true);
 					txtMessage.setEnabled(true);
 					btnSend.setEnabled(true);
+					txtChat.setEnabled(true);
+					txtChat.setText("");
+					ArrayList<String> listMsg = clientThread.getMessages(Integer.valueOf(client));
+					if (listMsg!=null) for (String msg : listMsg) txtChat.setText(txtChat.getText()+msg);
 				}
 			}
 		});
@@ -146,7 +154,7 @@ public class Client {
 			frame.getContentPane().add(cmbClients);
 			ownSocket = new Socket(SERVERIP, SERVERPORT);
 			ous = new ObjectOutputStream(ownSocket.getOutputStream());
-			ClientThread clientThread = new ClientThread();
+			clientThread = new ClientThread();
 			clientThread.start();
 
 		}catch(Exception e){
@@ -155,8 +163,27 @@ public class Client {
 	}
 
 	public static class ClientThread extends Thread{
-		public ClientThread(){
 
+		private HashMap<Integer, ArrayList<String>> messages;
+
+		public ClientThread(){
+			messages = new HashMap<Integer, ArrayList<String>>();
+		}
+
+		public void addMessages(Integer target, String msg){
+			ArrayList<String> targetMessages = messages.get(target);
+			if (targetMessages!=null){
+				targetMessages.add(msg);
+				messages.put(target, targetMessages);
+			}else{
+				targetMessages = new ArrayList<String>();
+				targetMessages.add(msg);
+				messages.put(target, targetMessages);
+			}
+		}
+
+		public ArrayList<String> getMessages(Integer target){
+			return messages.get(target);
 		}
 
 		@Override
@@ -178,7 +205,10 @@ public class Client {
 							cmbClients.addItem(String.valueOf(currentsClients));
 						}
 					}
-					if (infoFromServer.getMessage()!=null) txtChat.setText(txtChat.getText()+"\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
+					if (infoFromServer.getMessage()!=null){
+						txtChat.setText(txtChat.getText()+"\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
+						addMessages(infoFromServer.getTarget(), "\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
+					}
 				}
 
 			}catch(Exception e){
