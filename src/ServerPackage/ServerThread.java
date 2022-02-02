@@ -10,13 +10,11 @@ import java.util.ArrayList;
 
 public class ServerThread extends Thread {
 
-    private Socket clientSocket;
-    private ServerInfo serverInfo;
+    private final ServerInfo serverInfo;
     private ObjectOutputStream ous;
     private ObjectInputStream ois;
 
     public ServerThread(Socket clientSocket, ServerInfo serverInfo) {
-        this.clientSocket = clientSocket;
         this.serverInfo = serverInfo;
 
         try {
@@ -38,6 +36,7 @@ public class ServerThread extends Thread {
             ArrayList<Integer> clientsID = new ArrayList<Integer>();
             for (int i = 0; i < serverInfo.getCONECTIONSAMOUNT(); i++) clientsID.add(i);
 
+            //Enviamos la informacion inicial al cliente
             clientInfo = new TransferData(clientsID, null, serverInfo.getCONECTIONSAMOUNT()-1,null);
             ous.reset();
             ous.writeObject(clientInfo);
@@ -45,7 +44,7 @@ public class ServerThread extends Thread {
             while (true){
                 TransferData infoFromClient = (TransferData) ois.readObject();
 
-
+                //Se procesa la informacion recibida y se lo manda al destinatario
                 try{
                     ObjectOutputStream ous = new ObjectOutputStream(ServerInfo.clientsSockets.get(infoFromClient.getTarget()).getOutputStream());
                     ous.reset();
@@ -59,8 +58,7 @@ public class ServerThread extends Thread {
                 }
             }
         }catch (Exception e){
-            System.err.println("Error al comunicarse con el cliente: "+e.getMessage());
-            e.printStackTrace();
+            System.err.println("El cliente "+id+" se ha desconectado");
             serverInfo.deleteSocketByID(id);
         }
     }

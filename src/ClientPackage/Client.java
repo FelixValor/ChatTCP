@@ -31,7 +31,7 @@ public class Client {
 	private static JButton btnExit = new JButton("Salir");
 	private static JComboBox<String> cmbClients = new JComboBox<>();
 	private static JTextPane txtChat = new JTextPane();
-	private static JLabel lblNickname = new JLabel("Cliente:");
+	private static JLabel lblNickname = new JLabel("Chat con: -");
 	private static JButton btnAbrirChat;
 
 	private static final int SERVERPORT = 4444;
@@ -79,6 +79,7 @@ public class Client {
 				if (txtMessage.getText().trim().equals("")) JOptionPane.showMessageDialog(null, "Introduce un mensaje");
 				else{
 					try{
+						//Recogemos datos para enviar al servidor y se lo enviamos
 						ous.reset();
 						ous.writeObject(new TransferData(infoFromServer.getCurrentsClients(), txtMessage.getText(), ownID, targetID));
 						clientThread.addMessages(targetID, "\n"+ownID+">"+txtMessage.getText());
@@ -127,13 +128,13 @@ public class Client {
 		btnAbrirChat = new JButton("Abrir Chat");
 		btnAbrirChat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				//Se habilitan las funcionalidades para el chat y leemos el chat
 				txtChat.setEnabled(true);
 				txtMessage.setEnabled(true);
 				btnSend.setEnabled(true);
 				txtChat.setEnabled(true);
 				txtChat.setText("");
-				targetID = Integer.parseInt((String) cmbClients.getSelectedItem());
-				clientThread.readMessage(String.valueOf(targetID));
+				clientThread.openChat();
 			}
 		});
 		btnAbrirChat.setBounds(441, 111, 133, 23);
@@ -165,6 +166,7 @@ public class Client {
 			messages = new HashMap<Integer, ArrayList<String>>();
 		}
 
+		//Se agregan los mensajes al historial del target que se le pasa
 		public void addMessages(Integer target, String msg){
 			ArrayList<String> targetMessages = messages.get(target);
 			if (targetMessages!=null){
@@ -177,15 +179,24 @@ public class Client {
 			}
 		}
 
+		//Devuelve los mensajes del target el cual sele pase
 		public ArrayList<String> getMessages(Integer target){
 			return messages.get(target);
 		}
 
+		//Lee los mensajes con el id que se le pasa
 		public void readMessage(String clientID){
 			txtChat.setText("");
 			ArrayList<String> listMsg = getMessages(Integer.valueOf(clientID));
 			if (listMsg!=null) for (String msg : listMsg) txtChat.setText(txtChat.getText()+msg);
 
+		}
+
+		//Identifica el usuario con el que va a hablar y carga los mensajes
+		public void openChat() {
+			targetID = Integer.parseInt((String) cmbClients.getSelectedItem());
+			lblNickname.setText("Chat con: "+targetID);
+			readMessage(String.valueOf(targetID));
 		}
 
 		@Override
@@ -195,35 +206,29 @@ public class Client {
 					ois = new ObjectInputStream(ownSocket.getInputStream());
 					infoFromServer = (TransferData) ois.readObject();
 
+					//Recogemos nuestro id como cliente del servidor solo la primera vez
 					if(!gotID){
 						ownID = infoFromServer.getClientID();
-						lblNickname.setText("Cliente: "+ownID);
+						frame.setTitle("Cliente: "+ownID);
 						gotID = true;
 					}
 
+					//Cargamos la lista de clientes disponibles
 					cmbClients.removeAllItems();
+					for (Integer currentsClients : infoFromServer.getCurrentsClients()) if(!Objects.equals(currentsClients, ownID)) cmbClients.addItem(String.valueOf(currentsClients));
 
-					for (Integer currentsClients : infoFromServer.getCurrentsClients()) {
-						if(!Objects.equals(currentsClients, ownID)) cmbClients.addItem(String.valueOf(currentsClients));
-					}
-
+					//Si el mensaje no es nulo, lo añadimos al historial de mensajes del client target
 					if (infoFromServer.getMessage()!=null){
-
 						addMessages(infoFromServer.getTarget(), "\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
-
-						if (targetID==infoFromServer.getTarget()){
-							txtChat.setText(txtChat.getText()+"\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
-						}
+						if (targetID==infoFromServer.getTarget()) txtChat.setText(txtChat.getText()+"\n"+infoFromServer.getTarget()+">"+infoFromServer.getMessage());
 					}
 
-
+					//Sirve para cuando recibamos un mensaje ir a ese chat y leemos sus mensajes anteriores si los tiene
 					if(infoFromServer.getTarget()!=null){
 						for (int i = 0; i < infoFromServer.getCurrentsClients().size(); i++) {
 							if(infoFromServer.getTarget()==Integer.parseInt(cmbClients.getItemAt(i))){
 								cmbClients.setSelectedIndex(i);
-								readMessage(String.valueOf(infoFromServer.getTarget()));
-								targetID = Integer.valueOf((String)cmbClients.getSelectedItem());
-								System.out.println(targetID);
+								openChat();
 								break;
 							}
 						}
@@ -234,8 +239,8 @@ public class Client {
 
 			}catch(Exception e){
 				System.err.println("Error al comunicarse con el Servidor: "+e.getMessage());
-				e.printStackTrace();
 			}
 		}
+
 	}
 }
